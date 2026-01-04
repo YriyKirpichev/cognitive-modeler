@@ -1,0 +1,62 @@
+{
+  "name": "cognitive-modeler",
+  "version": "1.0.0",
+  "description": "App for modeling cognitive maps",
+  "license": "MIT",
+  "author": "YriyKirpichev",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "bash scripts/dev.sh",
+    "build": "npm run build:frontend && npm run build:backend && electron-builder",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "npm run build:backend:$(node -p \"process.platform === 'win32' ? 'win' : 'linux'\")",
+    "build:backend:linux": "cd backend && pyinstaller cognitive-modeler-backend.spec && mkdir -p ../resources/backend/linux && cp dist/main ../resources/backend/linux/cognitive-backend",
+    "build:backend:win": "cd backend && uv pip freeze > requirements.txt && docker build -f docker/Dockerfile.windows -t cognitive-backend-builder . && docker run --rm -v $(pwd)/dist:/app/output cognitive-backend-builder && mkdir -p ../resources/backend/win && cp dist/main.exe ../resources/backend/win/cognitive-backend.exe",
+    "build:linux": "npm run build:frontend && npm run build:backend:linux && electron-builder --linux",
+    "build:win": "npm run build:frontend && npm run build:backend:win && electron-builder --win",
+    "postinstall": "cd frontend && npm install"
+  },
+  "build": {
+    "appId": "com.yriykirpichev.cognitivemaps",
+    "productName": "Cognitive Modeler",
+    "files": [
+      "main.js",
+      "config.js",
+      "frontend/dist/**/*",
+      "!frontend/src",
+      "!frontend/node_modules"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/backend/${os}",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "resources/assets/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "resources/assets/icon.png",
+      "category": "Science"
+    }
+  },
+  "devDependencies": {
+    "@electron/fuses": "^1.8.0",
+    "concurrently": "^8.2.2",
+    "dotenv": "^17.2.3",
+    "dotenv-cli": "^11.0.0",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "wait-on": "^8.0.1"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1"
+  }
+}

@@ -1,0 +1,10 @@
+[project]
+name = "cognitive-modeler-backend"
+version = "0.1.0"
+description = "Backend for app for modeling cognitive maps"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.128.0",
+    "pyinstaller>=6.17.0",
+]

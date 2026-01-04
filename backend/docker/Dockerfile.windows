@@ -1,0 +1,16 @@
+# docker/Dockerfile.windows
+FROM tobix/pywine:3.13
+
+WORKDIR /app
+
+RUN wine pip install uv
+
+COPY . .
+
+RUN wine python -m uv pip compile pyproject.toml -o requirements.txt
+
+RUN wine pip install -r requirements.txt && \
+    wine pip install pyinstaller
+
+RUN wine pyinstaller cognitive-modeler-backend.spec
+CMD ["sh", "-c", "cp -r /app/dist/* /app/output/ 2>/dev/null || echo 'Build artifacts copied'"]

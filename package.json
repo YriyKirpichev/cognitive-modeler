@@ -39,9 +39,7 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "resources/assets/icon.ico",
-      "sign": null,
-      "signingHashAlgorithms": []
+      "icon": "resources/assets/icon.ico"
     },
     "linux": {
       "target": "AppImage",

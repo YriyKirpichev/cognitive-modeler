@@ -39,12 +39,21 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "resources/assets/icon.ico"
+      "icon": "resources/assets/icon.ico",
+      "sign": null,
+      "signingHashAlgorithms": []
     },
     "linux": {
       "target": "AppImage",
       "icon": "resources/assets/icon.png",
       "category": "Science"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "resources/assets/icon.ico",
+      "uninstallerIcon": "resources/assets/icon.ico",
+      "installerHeaderIcon": "resources/assets/icon.ico"
     }
   },
   "devDependencies": {

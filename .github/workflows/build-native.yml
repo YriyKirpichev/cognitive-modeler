@@ -33,14 +33,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install PyInstaller
+        run: |
+          cd backend
+          uv pip install --system pyinstaller
+
       - name: Build Frontend
         run: npm run build:frontend
 
       - name: Build Backend (Linux)
-        run: npm run build:backend:linux
+        run: |
+          cd backend
+          pyinstaller cognitive-modeler-backend.spec
+          mkdir -p ../resources/backend/linux
+          cp dist/main ../resources/backend/linux/cognitive-modeler-backend
 
       - name: Build Electron App (Linux)
-        run: npm run build:linux
+        run: npx electron-builder --linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -52,7 +61,7 @@ jobs:
           retention-days: 7
 
   build-windows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     
     steps:
       - name: Checkout code
@@ -64,25 +73,36 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
 
       - name: Install uv
         run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          irm https://astral.sh/uv/install.ps1 | iex
+          echo "$env:USERPROFILE\.cargo\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install PyInstaller
+        run: |
+          cd backend
+          uv pip install --system pyinstaller
 
       - name: Build Frontend
         run: npm run build:frontend
 
       - name: Build Backend (Windows)
-        run: npm run build:backend:win
+        run: |
+          cd backend
+          pyinstaller cognitive-modeler-backend.spec
+          New-Item -ItemType Directory -Force -Path ..\resources\backend\win
+          Copy-Item dist\main.exe ..\resources\backend\win\cognitive-modeler-backend.exe
 
       - name: Build Electron App (Windows)
-        run: npm run build:win
+        run: npx electron-builder --win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

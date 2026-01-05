@@ -72,7 +72,7 @@ async function startBackend() {
   } else {
     console.log('Starting backend in production mode...')
     const platform = process.platform
-    const exeName = platform === 'win32' ? 'cognitive-backend.exe' : 'cognitive-backend'
+    const exeName = platform === 'win32' ? 'cognitive-modeler-backend.exe' : 'cognitive-modeler-backend'
     const backendPath = path.join(process.resourcesPath, 'backend', exeName)
     
     console.log(`Backend executable path: ${backendPath}`)

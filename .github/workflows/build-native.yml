@@ -37,7 +37,7 @@ jobs:
         run: |
           cd backend
           uv sync --no-dev
-          uv pip install --system pyinstaller
+          uv pip install pyinstaller
 
       - name: Build Frontend
         run: npm run build:frontend
@@ -45,7 +45,7 @@ jobs:
       - name: Build Backend (Linux)
         run: |
           cd backend
-          pyinstaller cognitive-modeler-backend.spec
+          uv run pyinstaller cognitive-modeler-backend.spec
           mkdir -p ../resources/backend/linux
           cp dist/main ../resources/backend/linux/cognitive-modeler-backend
 
@@ -91,7 +91,7 @@ jobs:
         run: |
           cd backend
           uv sync --no-dev
-          uv pip install --system pyinstaller
+          uv pip install pyinstaller
 
       - name: Build Frontend
         run: npm run build:frontend
@@ -99,7 +99,7 @@ jobs:
       - name: Build Backend (Windows)
         run: |
           cd backend
-          pyinstaller cognitive-modeler-backend.spec
+          uv run pyinstaller cognitive-modeler-backend.spec
           New-Item -ItemType Directory -Force -Path ..\resources\backend\win
           Copy-Item dist\main.exe ..\resources\backend\win\cognitive-modeler-backend.exe
 

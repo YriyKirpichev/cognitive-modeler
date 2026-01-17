@@ -17,5 +17,4 @@ echo "Backend host: $BACKEND_HOST"
 
 npx concurrently -k \
   "cd frontend && npm run dev -- --port $FRONTEND_PORT" \
-  "cd backend && BACKEND_PORT=$BACKEND_PORT uv run fastapi dev app/main.py --port $BACKEND_PORT" \
   "npx wait-on http://localhost:$FRONTEND_PORT && electron ."

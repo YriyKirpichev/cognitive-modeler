@@ -31,4 +31,25 @@ export const projectApi = {
     const response = await apiClient.post<{ ok: boolean }>('/project/save-to-file')
     return response.data
   },
+
+  async newProject(filePath: string): Promise<CognitiveMap> {
+    const response = await apiClient.post<CognitiveMap>('/project/new', {
+      file_path: filePath,
+    })
+    return response.data
+  },
+
+  async openProject(filePath: string): Promise<CognitiveMap> {
+    const response = await apiClient.post<CognitiveMap>('/project/open', {
+      file_path: filePath,
+    })
+    return response.data
+  },
+
+  async saveAsProject(filePath: string): Promise<CognitiveMap> {
+    const response = await apiClient.post<CognitiveMap>('/project/save-as', {
+      file_path: filePath,
+    })
+    return response.data
+  },
 }

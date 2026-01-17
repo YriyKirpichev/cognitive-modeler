@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
   onMenuNewProject: (callback) => {
-    ipcRenderer.on('menu-new-project', callback)
+    ipcRenderer.on('menu-new-project', (_event, filePath) => callback(filePath))
   },
   onMenuOpenProject: (callback) => {
     ipcRenderer.on('menu-open-project', (_event, filePath) => callback(filePath))

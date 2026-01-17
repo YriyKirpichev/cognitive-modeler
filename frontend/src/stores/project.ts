@@ -163,30 +163,47 @@ export const useProjectStore = defineStore('project', () => {
     }
   }
 
-  function createNewProject() {
-    const newMap: CognitiveMap = {
-      version: 1,
-      nodes: [],
-      edges: [],
-      fcm: {
-        state_range: [-1.0, 1.0],
-        activation: {
-          type: 'tanh',
-          lambda: 1.0,
-        },
-      },
+  async function createNewProject(filePath: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      // Auto-save current project if there are unsaved changes
+      if (hasUnsavedChanges.value && currentFilePath.value) {
+        await saveToFile()
+      }
+
+      // Create new project via backend
+      currentMap.value = await projectApi.newProject(filePath)
+      currentFilePath.value = filePath
+      await updateHistoryInfo()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to create new project'
+      throw err
+    } finally {
+      isLoading.value = false
     }
-    currentFilePath.value = null
-    updateMap(newMap)
   }
 
   async function openProject(filePath: string) {
+    isLoading.value = true
+    error.value = null
     try {
+      // Auto-save current project if there are unsaved changes
+      if (hasUnsavedChanges.value && currentFilePath.value) {
+        await saveToFile()
+      }
+
+      // Open project via backend
+      currentMap.value = await projectApi.openProject(filePath)
       currentFilePath.value = filePath
-      await loadMap()
+      await updateHistoryInfo()
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to open project'
+      // Keep current project open on error
+      console.error('Error opening project:', err)
       throw err
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -198,8 +215,18 @@ export const useProjectStore = defineStore('project', () => {
   }
 
   async function saveProjectAs(filePath: string) {
-    currentFilePath.value = filePath
-    await saveToFile()
+    isLoading.value = true
+    error.value = null
+    try {
+      currentMap.value = await projectApi.saveAsProject(filePath)
+      currentFilePath.value = filePath
+      await updateHistoryInfo()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to save project as'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {

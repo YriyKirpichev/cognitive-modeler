@@ -230,7 +230,18 @@ function createMenu() {
           label: 'New Project',
           accelerator: 'CmdOrCtrl+N',
           click: async () => {
-            mainWindow.webContents.send('menu-new-project')
+            const result = await dialog.showSaveDialog(mainWindow, {
+              title: 'Create New Cognitive Map Project',
+              defaultPath: 'new_cognitive_map.json',
+              filters: [
+                { name: 'JSON Files', extensions: ['json'] },
+                { name: 'All Files', extensions: ['*'] }
+              ]
+            })
+
+            if (!result.canceled && result.filePath) {
+              mainWindow.webContents.send('menu-new-project', result.filePath)
+            }
           }
         },
         {

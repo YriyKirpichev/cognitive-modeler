@@ -70,6 +70,66 @@ class CognitiveMapStore:
             )
             os.replace(tmp, self.path)
 
+    async def load_from_path(self, new_path: Path) -> None:
+        async with self.lock:
+            if not new_path.exists():
+                raise FileNotFoundError(f"File not found: {new_path}")
+
+            data = json.loads(new_path.read_text(encoding="utf-8"))
+            new_map = CognitiveMapModel.model_validate(data)
+
+            # Validate integrity before switching
+            self._validate_integrity(new_map)
+
+            # Switch to new file
+            self.path = new_path
+            self.current = new_map
+            self.current_hash = sha256_of(self.current)
+            self.undo_stack.clear()
+            self.redo_stack.clear()
+            logger.info(f"Loaded cognitive map from: {new_path}")
+
+    async def create_new_at_path(self, new_path: Path) -> None:
+        async with self.lock:
+            # Create empty map
+            self.current = CognitiveMapModel()
+            self.current_hash = sha256_of(self.current)
+            self.undo_stack.clear()
+            self.redo_stack.clear()
+
+            # Switch to new path
+            self.path = new_path
+
+            # Save the new empty project
+            payload = self.current.model_dump(by_alias=True, exclude_none=True)
+
+            # Ensure parent directory exists
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+
+            tmp = self.path.with_suffix(self.path.suffix + ".tmp")
+            tmp.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            os.replace(tmp, self.path)
+            logger.info(f"Created new cognitive map at: {new_path}")
+
+    async def save_as(self, new_path: Path) -> None:
+        async with self.lock:
+            # Ensure parent directory exists
+            new_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Save to new path
+            payload = self.current.model_dump(by_alias=True, exclude_none=True)
+            tmp = new_path.with_suffix(new_path.suffix + ".tmp")
+            tmp.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            os.replace(tmp, new_path)
+
+            # Switch to new path
+            self.path = new_path
+            logger.info(f"Saved cognitive map as: {new_path}")
+
     # ---------- integrity ----------
     def _validate_integrity(self, m: CognitiveMapModel) -> None:
         ids = [n.id for n in m.nodes]

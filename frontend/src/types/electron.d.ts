@@ -1,5 +1,5 @@
 export interface ElectronAPI {
-  onMenuNewProject: (callback: () => void) => void
+  onMenuNewProject: (callback: (filePath: string) => void) => void
   onMenuOpenProject: (callback: (filePath: string) => void) => void
   onMenuSaveProject: (callback: () => void) => void
   onMenuSaveProjectAs: (callback: (filePath: string) => void) => void

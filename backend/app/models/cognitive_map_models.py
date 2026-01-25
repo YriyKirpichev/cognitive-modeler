@@ -15,6 +15,7 @@ class NodeModel(BaseModel):
     id: str
     label: str = ""
     ui: NodeUIModel
+    preferred_state: Optional[Literal["increase", "decrease"]] = None
 
 
 class EdgeModel(BaseModel):

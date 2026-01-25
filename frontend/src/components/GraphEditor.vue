@@ -105,7 +105,6 @@ const showEdgeDrawer = ref(false)
 const isConnectMode = ref(false)
 const connectSourceNode = ref<string | null>(null)
 
-// Для отслеживания перетаскивания
 const draggedNodes = ref<Map<string, { x: number; y: number }>>(new Map())
 
 // Convert store nodes to VueFlow nodes
@@ -114,7 +113,7 @@ function convertToFlowNodes(storeNodes: Node[]): FlowNode[] {
     id: node.id,
     type: 'simple',
     position: { x: node.ui.x, y: node.ui.y },
-    draggable: true, // Явно разрешаем перетаскивание
+    draggable: true,
     data: {
       label: node.label || node.id,
       ...node,
@@ -144,7 +143,6 @@ function convertToFlowEdges(storeEdges: Edge[]): FlowEdge[] {
   }))
 }
 
-// Watch for changes in project store
 watch(
   () => projectStore.nodes,
   (newNodes) => {
@@ -161,7 +159,6 @@ watch(
   { immediate: true },
 )
 
-// Handle node changes
 function onNodesChange(changes: any[]) {
   changes.forEach((change) => {
     if (change.type === 'position' && change.position) {
@@ -178,7 +175,7 @@ function onNodesChange(changes: any[]) {
   })
 }
 
-// Обработчик окончания перетаскивания узла
+
 async function onNodeDragStop(event: { node: FlowNode }) {
   const nodeId = event.node.id
   const position = event.node.position
@@ -198,7 +195,6 @@ async function onNodeDragStop(event: { node: FlowNode }) {
   }
 }
 
-// Handle edge changes
 function onEdgesChange(changes: any[]) {
   changes.forEach((change) => {
     if (change.type === 'remove') {
@@ -224,9 +220,7 @@ function onEdgesChange(changes: any[]) {
   })
 }
 
-// Handle node click - для режима соединения
 function onNodeClick(event: { node: FlowNode; event: MouseEvent }) {
-  // В режиме соединения обрабатываем только клики, не перетаскивание
   if (isConnectMode.value) {
     handleConnectModeClick(event.node.id)
     return
@@ -238,17 +232,14 @@ function onNodeClick(event: { node: FlowNode; event: MouseEvent }) {
   showEdgeDrawer.value = false
 }
 
-// Обработка кликов в режиме соединения
 async function handleConnectModeClick(nodeId: string) {
   if (!connectSourceNode.value) {
-    // Первый клик - выбираем исходный узел
     connectSourceNode.value = nodeId
     const node = nodes.value.find(n => n.id === nodeId)
     if (node) {
       ElMessage.info(`Source: ${node.data.label}. Now click target node.`)
     }
   } else {
-    // Второй клик - выбираем целевой узел и создаем связь
     const sourceId = connectSourceNode.value
     const targetId = nodeId
 
@@ -439,12 +430,10 @@ function updateEdgeConfidence() {
   padding: 16px;
 }
 
-/* Стили для стрелок на связях */
 :deep(.vue-flow__edge-path) {
   stroke-width: 2;
 }
 
-/* Улучшенное выделение связей */
 :deep(.vue-flow__edge.selected .vue-flow__edge-path) {
   stroke: var(--el-color-primary) !important;
   stroke-width: 4 !important;

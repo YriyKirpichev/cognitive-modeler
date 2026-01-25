@@ -38,7 +38,7 @@ const emit = defineEmits<{
 const tabs = [
   { name: 'graph', label: 'Graph', icon: Share },
   { name: 'matrix', label: 'Matrix', icon: Grid },
-  { name: 'metrics', label: 'Metrics', icon: DataAnalysis },
+  { name: 'metrics', label: 'Metrics & State', icon: DataAnalysis },
   { name: 'scenarios', label: 'Scenarios', icon: VideoPlay },
 ]
 

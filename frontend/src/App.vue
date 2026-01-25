@@ -13,9 +13,7 @@
       <div class="workspace">
         <GraphEditor v-if="currentTab === 'graph'" />
         <MatrixEditor v-else-if="currentTab === 'matrix'" />
-        <div v-else-if="currentTab === 'metrics'" class="placeholder">
-          <el-empty description="Metrics will be here" />
-        </div>
+        <MetricsEditor v-else-if="currentTab === 'metrics'" />
         <div v-else-if="currentTab === 'scenarios'" class="placeholder">
           <el-empty description="Scenarios will be here" />
         </div>
@@ -30,6 +28,7 @@ import TopBar from './components/TopBar.vue'
 import SidePanel from './components/SidePanel.vue'
 import GraphEditor from './components/GraphEditor.vue'
 import MatrixEditor from './components/MatrixEditor.vue'
+import MetricsEditor from './components/MetricsEditor.vue'
 import { useProjectStore } from './stores/project'
 import { useElectronMenu } from './composables/useElectronMenu'
 

@@ -8,6 +8,7 @@ export interface Node {
   id: string
   label: string
   ui: NodeUI
+  preferred_state?: 'increase' | 'decrease'
 }
 
 export interface Edge {
@@ -41,4 +42,26 @@ export interface HistoryInfo {
   history_length: number
   can_undo: boolean
   can_redo: boolean
+}
+
+export type NodeType = 'driver' | 'receiver' | 'mediator' | 'isolated'
+
+export interface NodeMetrics {
+  node_id: string
+  indegree: number
+  outdegree: number
+  centrality: number
+  type: NodeType
+}
+
+export interface MetricsStatistics {
+  drivers: number
+  receivers: number
+  mediators: number
+  isolated: number
+}
+
+export interface MetricsResponse {
+  metrics: NodeMetrics[]
+  statistics: MetricsStatistics
 }

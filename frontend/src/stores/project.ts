@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { projectApi } from '@/services/projectApi'
-import type { CognitiveMap, Node, Edge, HistoryInfo } from '@/types/cognitive_map_models'
+import type { CognitiveMap, Node, Edge, HistoryInfo, Scenario } from '@/types/cognitive_map_models'
 
 export const useProjectStore = defineStore('project', () => {
   // State
@@ -15,6 +15,7 @@ export const useProjectStore = defineStore('project', () => {
   const nodes = computed(() => currentMap.value?.nodes ?? [])
   const edges = computed(() => currentMap.value?.edges ?? [])
   const fcm = computed(() => currentMap.value?.fcm)
+  const scenarios = computed(() => currentMap.value?.fcm.scenarios ?? [])
   const canUndo = computed(() => historyInfo.value?.can_undo ?? false)
   const canRedo = computed(() => historyInfo.value?.can_redo ?? false)
   const hasUnsavedChanges = computed(() => {
@@ -229,6 +230,22 @@ export const useProjectStore = defineStore('project', () => {
     }
   }
 
+  // Refresh scenarios from backend
+  async function refreshScenarios() {
+    if (!currentMap.value) return
+    
+    try {
+      // Reload the entire map to get updated scenarios
+      const updatedMap = await projectApi.getMap()
+      // Only update scenarios to avoid overwriting other changes
+      if (currentMap.value.fcm) {
+        currentMap.value.fcm.scenarios = updatedMap.fcm.scenarios
+      }
+    } catch (err) {
+      console.error('Failed to refresh scenarios:', err)
+    }
+  }
+
   return {
     // State
     currentMap,
@@ -241,6 +258,7 @@ export const useProjectStore = defineStore('project', () => {
     nodes,
     edges,
     fcm,
+    scenarios,
     canUndo,
     canRedo,
     hasUnsavedChanges,
@@ -261,5 +279,6 @@ export const useProjectStore = defineStore('project', () => {
     openProject,
     saveProject,
     saveProjectAs,
+    refreshScenarios,
   }
 })

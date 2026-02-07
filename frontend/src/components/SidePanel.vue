@@ -33,6 +33,7 @@ import { Share, Grid, DataAnalysis, VideoPlay, DArrowLeft, DArrowRight } from '@
 
 const emit = defineEmits<{
   (e: 'tab-change', tab: string): void
+  (e: 'select-scenario', scenarioId: string): void
 }>()
 
 const tabs = [

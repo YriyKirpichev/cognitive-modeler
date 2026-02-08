@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { projectApi } from '@/services/projectApi'
-import type { CognitiveMap, Node, Edge, HistoryInfo } from '@/types/cognitive_map_models'
+import type { CognitiveMap, Node, Edge, HistoryInfo, Scenario, ScenarioResult } from '@/types/cognitive_map_models'
 
 export const useProjectStore = defineStore('project', () => {
   // State
@@ -11,10 +11,13 @@ export const useProjectStore = defineStore('project', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
+  const simulationResults = ref<Map<string, ScenarioResult>>(new Map())
+
   // Getters
   const nodes = computed(() => currentMap.value?.nodes ?? [])
   const edges = computed(() => currentMap.value?.edges ?? [])
   const fcm = computed(() => currentMap.value?.fcm)
+  const scenarios = computed(() => currentMap.value?.fcm.scenarios ?? [])
   const canUndo = computed(() => historyInfo.value?.can_undo ?? false)
   const canRedo = computed(() => historyInfo.value?.can_redo ?? false)
   const hasUnsavedChanges = computed(() => {
@@ -229,6 +232,42 @@ export const useProjectStore = defineStore('project', () => {
     }
   }
 
+  // Refresh scenarios from backend
+  async function refreshScenarios() {
+    if (!currentMap.value) return
+    
+    try {
+      // Reload the entire map to get updated scenarios
+      const updatedMap = await projectApi.getMap()
+      // Only update scenarios to avoid overwriting other changes
+      if (currentMap.value.fcm) {
+        currentMap.value.fcm.scenarios = updatedMap.fcm.scenarios
+      }
+    } catch (err) {
+      console.error('Failed to refresh scenarios:', err)
+    }
+  }
+
+  // Store simulation result with history for a scenario
+  function setSimulationResult(scenarioId: string, result: ScenarioResult) {
+    simulationResults.value.set(scenarioId, result)
+  }
+
+  // Get simulation result with history for a scenario
+  function getSimulationResult(scenarioId: string): ScenarioResult | undefined {
+    return simulationResults.value.get(scenarioId)
+  }
+
+  // Clear simulation result for a scenario
+  function clearSimulationResult(scenarioId: string) {
+    simulationResults.value.delete(scenarioId)
+  }
+
+  // Clear all simulation results
+  function clearAllSimulationResults() {
+    simulationResults.value.clear()
+  }
+
   return {
     // State
     currentMap,
@@ -236,11 +275,13 @@ export const useProjectStore = defineStore('project', () => {
     currentFilePath,
     isLoading,
     error,
+    simulationResults,
 
     // Getters
     nodes,
     edges,
     fcm,
+    scenarios,
     canUndo,
     canRedo,
     hasUnsavedChanges,
@@ -261,5 +302,10 @@ export const useProjectStore = defineStore('project', () => {
     openProject,
     saveProject,
     saveProjectAs,
+    refreshScenarios,
+    setSimulationResult,
+    getSimulationResult,
+    clearSimulationResult,
+    clearAllSimulationResults,
   }
 })

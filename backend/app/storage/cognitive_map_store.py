@@ -69,6 +69,7 @@ class CognitiveMapStore:
                 json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
             )
             os.replace(tmp, self.path)
+            logger.info(f"Saved cognitive map to: {self.path}")
 
     async def load_from_path(self, new_path: Path) -> None:
         async with self.lock:

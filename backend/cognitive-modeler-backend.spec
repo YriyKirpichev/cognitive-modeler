@@ -8,7 +8,7 @@ a = Analysis(
     ['app/main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('app', 'app'), ('core', 'core')],
     hiddenimports=[
         'uvicorn.logging',
         'uvicorn.loops',
@@ -21,6 +21,7 @@ a = Analysis(
         'uvicorn.lifespan',
         'uvicorn.lifespan.on',
         'fastapi',
+        'numpy',
     ],
     hookspath=[],
     hooksconfig={},

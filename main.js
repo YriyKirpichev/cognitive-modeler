@@ -172,10 +172,6 @@ async function createWindow() {
         slashes: true
       })
     )
-
-    if (config.enableDevTools) {
-      mainWindow.webContents.openDevTools()
-    }
   }
 
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {

@@ -7,8 +7,8 @@
       'confidence-high': confidenceLevel === 'high',
       'confidence-medium': confidenceLevel === 'medium',
       'confidence-low': confidenceLevel === 'low',
-      'weight-positive': weight !== null && weight > 0,
-      'weight-negative': weight !== null && weight < 0
+      'weight-positive': weight? weight !== null && weight > 0 : false,
+      'weight-negative': weight? weight !== null && weight < 0 : false
     }"
     @click="openEditDialog"
   >

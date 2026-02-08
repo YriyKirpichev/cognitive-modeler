@@ -51,6 +51,10 @@ class ScenarioResult(BaseModel):
     iterations_count: int
     converged: bool
     timestamp: str
+    history: Optional[List[Dict[str, float]]] = Field(
+        default=None,
+        description="State history for each iteration (not persisted to JSON)",
+    )
 
 
 class ScenarioModel(BaseModel):

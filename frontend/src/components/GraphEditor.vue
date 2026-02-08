@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { VueFlow } from '@vue-flow/core'
+import { MarkerType, VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { Plus, Connection, Delete, InfoFilled } from '@element-plus/icons-vue'
@@ -91,6 +91,9 @@ import { ElMessage } from 'element-plus'
 import type {
   Node as FlowNode,
   Edge as FlowEdge,
+  NodeChange,
+  EdgeChange,
+  NodeMouseEvent,
 } from '@vue-flow/core'
 import type { Node, Edge } from '@/types/cognitive_map_models'
 
@@ -115,8 +118,8 @@ function convertToFlowNodes(storeNodes: Node[]): FlowNode[] {
     position: { x: node.ui.x, y: node.ui.y },
     draggable: true,
     data: {
-      label: node.label || node.id,
       ...node,
+      label: node.label || node.id,
     },
   }))
 }
@@ -127,10 +130,10 @@ function convertToFlowEdges(storeEdges: Edge[]): FlowEdge[] {
     id: `${edge.source}-${edge.target}`,
     source: edge.source,
     target: edge.target,
-    type: 'default',
+    type: 'default' as const,
     animated: edge.weight !== 0,
     markerEnd: {
-      type: 'arrowclosed',
+      type: MarkerType.ArrowClosed,
       width: 20,
       height: 20,
     },
@@ -159,7 +162,7 @@ watch(
   { immediate: true },
 )
 
-function onNodesChange(changes: any[]) {
+function onNodesChange(changes: NodeChange[]) {
   changes.forEach((change) => {
     if (change.type === 'position' && change.position) {
       const node = nodes.value.find((n) => n.id === change.id)
@@ -195,7 +198,7 @@ async function onNodeDragStop(event: { node: FlowNode }) {
   }
 }
 
-function onEdgesChange(changes: any[]) {
+function onEdgesChange(changes: EdgeChange[]) {
   changes.forEach((change) => {
     if (change.type === 'remove') {
       const edge = edges.value.find((e) => e.id === change.id)
@@ -220,7 +223,7 @@ function onEdgesChange(changes: any[]) {
   })
 }
 
-function onNodeClick(event: { node: FlowNode; event: MouseEvent }) {
+function onNodeClick(event: NodeMouseEvent) {
   if (isConnectMode.value) {
     handleConnectModeClick(event.node.id)
     return

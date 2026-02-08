@@ -101,7 +101,11 @@
       </el-card>
 
       <!-- Results Visualization -->
-      <ScenarioGraphs v-if="scenario.result" :scenario="scenario" :nodes="projectStore.nodes" />
+      <ScenarioGraphs 
+        v-if="simulationResultWithHistory" 
+        :result="simulationResultWithHistory" 
+        :nodes="projectStore.nodes" 
+      />
     </div>
 
     <!-- Edit Parameters Dialog -->
@@ -156,12 +160,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { ArrowLeft, Edit, VideoPlay, CircleCheck } from '@element-plus/icons-vue'
+import { Edit, VideoPlay, CircleCheck } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { scenariosApi } from '@/services/scenariosApi'
 import { useProjectStore } from '@/stores/project'
 import ScenarioGraphs from './ScenarioGraphs.vue'
 import type { Scenario, ScenarioParams } from '@/types/cognitive_map_models'
+import { AxiosError } from 'axios'
 
 const props = defineProps<{
   scenarioId: string
@@ -179,6 +184,11 @@ const isLoading = ref(false)
 const isRunning = ref(false)
 const isSaving = ref(false)
 const showEditDialog = ref(false)
+
+// Get simulation result from store
+const simulationResultWithHistory = computed(() => {
+  return projectStore.getSimulationResult(props.scenarioId)
+})
 
 interface EditForm {
   name: string
@@ -247,21 +257,22 @@ async function handleRunSimulation() {
   try {
     const result = await scenariosApi.runScenario(props.scenarioId)
     
-    // Reload scenario to get updated result
+    projectStore.setSimulationResult(props.scenarioId, result)
     await loadScenario()
-    
-    // Refresh scenarios in store
     await projectStore.refreshScenarios()
-    
-    // Emit event to update scenarios panel
     emit('scenario-updated')
     
     ElMessage.success(
       `Simulation completed: ${result.iterations_count} iterations, converged: ${result.converged ? 'Yes' : 'No'}`
     )
-  } catch (error: any) {
+  } catch (error) {
     console.error('Failed to run simulation:', error)
-    const errorMessage = error.response?.data?.detail || 'Failed to run simulation'
+    
+    let errorMessage = 'Failed to run simulation'
+    if (error instanceof AxiosError) {
+      errorMessage = error.response?.data?.detail || errorMessage
+    }
+    
     ElMessage.error(errorMessage)
   } finally {
     isRunning.value = false

@@ -171,6 +171,12 @@ class ScenarioService:
         iterations_count = 0
         state_range = cognitive_map.fcm.state_range
 
+        # Initialize history list to store states at each iteration
+        history: List[Dict[str, float]] = []
+
+        # Store initial state (iteration 0)
+        history.append({index_to_node_id[idx]: float(state[idx]) for idx in range(n)})
+
         for iteration in range(params.max_iterations):
             iterations_count = iteration + 1
 
@@ -193,6 +199,11 @@ class ScenarioService:
                 new_state[target_idx] = np.clip(
                     activated_value, state_range[0], state_range[1]
                 )
+
+            # Store state after this iteration
+            history.append(
+                {index_to_node_id[idx]: float(new_state[idx]) for idx in range(n)}
+            )
 
             # Check convergence for auto mode
             if params.iteration_mode == "auto":
@@ -217,17 +228,18 @@ class ScenarioService:
         # Build final states dictionary
         final_states = {index_to_node_id[idx]: float(state[idx]) for idx in range(n)}
 
-        # Create result
+        # Create result with history
         result = ScenarioResult(
             final_states=final_states,
             iterations_count=iterations_count,
             converged=converged,
             timestamp=datetime.utcnow().isoformat() + "Z",
+            history=history,  # Include iteration history
         )
 
         logger.info(
             f"Simulation completed: {iterations_count} iterations, "
-            f"converged={converged}"
+            f"converged={converged}, history_length={len(history)}"
         )
 
         return result

@@ -160,7 +160,7 @@ async def run_scenario(
     scenario_id: str,
     store: CognitiveMapStore = Depends(get_cognitive_map_store),
 ):
-    """Run simulation for a scenario."""
+    """Run simulation for a scenario with full iteration history."""
     try:
         cognitive_map = await store.get()
 
@@ -178,20 +178,26 @@ async def run_scenario(
 
         scenario = cognitive_map.fcm.scenarios[scenario_index]
 
-        # Run simulation
         logger.info(f"Running simulation for scenario: {scenario_id}")
         result = ScenarioService.run_simulation(cognitive_map, scenario.params)
 
-        # Update scenario with result
-        scenario.result = result
+        # Create a copy of result without history
+        result_to_save = ScenarioResult(
+            final_states=result.final_states,
+            iterations_count=result.iterations_count,
+            converged=result.converged,
+            timestamp=result.timestamp,
+            history=None,  # Don't save history to JSON
+        )
+
+        scenario.result = result_to_save
         scenario.updated_at = datetime.utcnow().isoformat() + "Z"
 
-        # Save
         await store.put(cognitive_map)
 
         logger.info(
             f"Simulation completed for scenario: {scenario_id}, "
-            f"iterations={result.iterations_count}, converged={result.converged}"
+            f"iterations={result.iterations_count}, converged={result.converged}, history_length={len(result.history) if result.history else 0}"
         )
 
         return result

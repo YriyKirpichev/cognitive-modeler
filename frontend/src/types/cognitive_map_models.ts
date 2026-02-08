@@ -45,6 +45,7 @@ export interface ScenarioResult {
   iterations_count: number
   converged: boolean
   timestamp: string
+  history?: Array<Record<string, number>>
 }
 
 export interface Scenario {

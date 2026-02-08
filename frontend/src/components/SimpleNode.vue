@@ -8,12 +8,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, type CSSProperties } from 'vue'
 import type { NodeProps } from '@vue-flow/core'
 
 const props = defineProps<NodeProps>()
 
-const nodeStyle = computed(() => ({
+const nodeStyle = computed<CSSProperties>(() => ({
   backgroundColor: props.data.ui?.color || '#64748b',
   color: '#fff',
   borderRadius: '8px',
@@ -46,6 +46,6 @@ const nodeStyle = computed(() => ({
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
-  pointer-events: none; /* Позволяет кликам проходить через текст к родительскому элементу */
+  pointer-events: none;
 }
 </style>

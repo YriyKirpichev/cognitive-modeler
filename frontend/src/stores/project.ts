@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { projectApi } from '@/services/projectApi'
-import type { CognitiveMap, Node, Edge, HistoryInfo, Scenario } from '@/types/cognitive_map_models'
+import type { CognitiveMap, Node, Edge, HistoryInfo, Scenario, ScenarioResult } from '@/types/cognitive_map_models'
 
 export const useProjectStore = defineStore('project', () => {
   // State
@@ -10,6 +10,8 @@ export const useProjectStore = defineStore('project', () => {
   const currentFilePath = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+
+  const simulationResults = ref<Map<string, ScenarioResult>>(new Map())
 
   // Getters
   const nodes = computed(() => currentMap.value?.nodes ?? [])
@@ -246,6 +248,26 @@ export const useProjectStore = defineStore('project', () => {
     }
   }
 
+  // Store simulation result with history for a scenario
+  function setSimulationResult(scenarioId: string, result: ScenarioResult) {
+    simulationResults.value.set(scenarioId, result)
+  }
+
+  // Get simulation result with history for a scenario
+  function getSimulationResult(scenarioId: string): ScenarioResult | undefined {
+    return simulationResults.value.get(scenarioId)
+  }
+
+  // Clear simulation result for a scenario
+  function clearSimulationResult(scenarioId: string) {
+    simulationResults.value.delete(scenarioId)
+  }
+
+  // Clear all simulation results
+  function clearAllSimulationResults() {
+    simulationResults.value.clear()
+  }
+
   return {
     // State
     currentMap,
@@ -253,6 +275,7 @@ export const useProjectStore = defineStore('project', () => {
     currentFilePath,
     isLoading,
     error,
+    simulationResults,
 
     // Getters
     nodes,
@@ -280,5 +303,9 @@ export const useProjectStore = defineStore('project', () => {
     saveProject,
     saveProjectAs,
     refreshScenarios,
+    setSimulationResult,
+    getSimulationResult,
+    clearSimulationResult,
+    clearAllSimulationResults,
   }
 })

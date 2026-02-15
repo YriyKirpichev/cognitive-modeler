@@ -143,9 +143,9 @@ class ScenarioService:
 
         # Check that initial_states contains all nodes
         if len(params.initial_states) != len(node_ids):
-            raise ValueError(
-                f"initial_states must contain values for all {len(node_ids)} nodes"
-            )
+            for node in params.initial_states:
+                if node not in node_ids:
+                    params.initial_states[node] = 0.0  # Default to 0 for missing nodes
 
         # Build adjacency matrix
         adjacency_matrix, node_id_to_index, index_to_node_id = (

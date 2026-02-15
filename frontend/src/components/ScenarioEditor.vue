@@ -43,22 +43,6 @@
             </div>
           </div>
 
-          <div v-if="scenario.result" class="result-summary">
-            <el-divider />
-            <el-descriptions title="Simulation Results" :column="3" border>
-              <el-descriptions-item label="Iterations">
-                {{ scenario.result.iterations_count }}
-              </el-descriptions-item>
-              <el-descriptions-item label="Converged">
-                <el-tag :type="scenario.result.converged ? 'success' : 'warning'">
-                  {{ scenario.result.converged ? 'Yes' : 'No' }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="Timestamp">
-                {{ formatTimestamp(scenario.result.timestamp) }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </div>
           <div class="editor-header">
             <div class="header-actions">
               <el-button :icon="Edit" @click="showEditDialog = true">Edit Parameters</el-button>

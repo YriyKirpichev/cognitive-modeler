@@ -21,6 +21,7 @@
   "build": {
     "appId": "com.yriykirpichev.cognitivemaps",
     "productName": "Cognitive Modeler",
+    "publish": null,
     "files": [
       "main.js",
       "config.js",

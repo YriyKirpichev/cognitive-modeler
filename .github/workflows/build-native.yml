@@ -50,9 +50,7 @@ jobs:
           cp dist/main ../resources/backend/linux/cognitive-modeler-backend
 
       - name: Build Electron App (Linux)
-        run: npx electron-builder --linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --linux --publish never
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
@@ -104,9 +102,7 @@ jobs:
           Copy-Item dist\main.exe ..\resources\backend\win\cognitive-modeler-backend.exe
 
       - name: Build Electron App (Windows)
-        run: npx electron-builder --win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --publish never
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4

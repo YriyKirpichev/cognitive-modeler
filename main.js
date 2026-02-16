@@ -4,6 +4,7 @@ const path = require('path')
 const { promisify } = require('util')
 const net = require('net')
 const url = require('url')
+const kill = require('tree-kill')
 
 const fs = require('fs')
 const envPath = path.join(__dirname, '.env')
@@ -20,6 +21,7 @@ const sleep = promisify(setTimeout)
 
 let pythonProcess = null
 let mainWindow = null
+let isQuitting = false
 
 const isDev = !app.isPackaged
 
@@ -75,6 +77,49 @@ async function waitForBackend(maxAttempts = 30) {
   throw new Error('Backend failed to start within timeout')
 }
 
+function killPythonProcess() {
+  return new Promise((resolve) => {
+    if (!pythonProcess || pythonProcess.killed) {
+      console.log('No backend process to kill')
+      resolve()
+      return
+    }
+
+    console.log(`Killing backend process (PID: ${pythonProcess.pid})...`)
+    
+    kill(pythonProcess.pid, 'SIGTERM', (err) => {
+      if (err) {
+        console.error('Error during graceful shutdown:', err)
+        console.log('Attempting forceful shutdown...')
+        
+        kill(pythonProcess.pid, 'SIGKILL', (killErr) => {
+          if (killErr) {
+            console.error('Error during forceful shutdown:', killErr)
+          } else {
+            console.log('Backend process forcefully terminated')
+          }
+          pythonProcess = null
+          resolve()
+        })
+      } else {
+        console.log('Backend process gracefully terminated')
+        pythonProcess = null
+        resolve()
+      }
+    })
+
+    setTimeout(() => {
+      if (pythonProcess && !pythonProcess.killed) {
+        console.log('Timeout reached, forcing kill...')
+        kill(pythonProcess.pid, 'SIGKILL', () => {
+          pythonProcess = null
+          resolve()
+        })
+      }
+    }, 5000)
+  })
+}
+
 async function startBackend() {
   const portAvailable = await isPortAvailable(config.backend.port)
   if (!portAvailable) {
@@ -128,10 +173,12 @@ async function startBackend() {
 
   pythonProcess.on('close', (code) => {
     console.log(`Backend process exited with code ${code}`)
+    pythonProcess = null
   })
 
   pythonProcess.on('error', (error) => {
     console.error('Failed to start backend:', error)
+    pythonProcess = null
   })
 }
 
@@ -181,6 +228,7 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+  
   createMenu()
 }
 
@@ -194,16 +242,10 @@ app.whenReady().then(() => {
   })
 })
 
-app.on('window-all-closed', () => {
-  if (pythonProcess && !pythonProcess.killed) {
-    console.log('Killing backend process...')
-    pythonProcess.kill('SIGTERM')
-
-    setTimeout(() => {
-      if (pythonProcess && !pythonProcess.killed) {
-        pythonProcess.kill('SIGKILL')
-      }
-    }, 2000)
+app.on('window-all-closed', async () => {
+  if (!isQuitting) {
+    isQuitting = true
+    await killPythonProcess()
   }
   
   if (process.platform !== 'darwin') {
@@ -211,9 +253,25 @@ app.on('window-all-closed', () => {
   }
 })
 
-app.on('before-quit', () => {
+app.on('before-quit', async (event) => {
+  if (pythonProcess && !pythonProcess.killed && !isQuitting) {
+    event.preventDefault()
+    isQuitting = true
+    
+    console.log('Application is quitting, cleaning up...')
+    await killPythonProcess()
+    
+    setTimeout(() => {
+      app.exit(0)
+    }, 500)
+  }
+})
+
+app.on('will-quit', async (event) => {
   if (pythonProcess && !pythonProcess.killed) {
-    pythonProcess.kill('SIGTERM')
+    event.preventDefault()
+    await killPythonProcess()
+    app.exit(0)
   }
 })
 

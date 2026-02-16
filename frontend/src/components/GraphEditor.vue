@@ -698,6 +698,8 @@ watch(
 }
 
 .properties-sidebar {
+  position: absolute;
+  right: 0;
   width: 320px;
   height: 100%;
   background-color: var(--el-bg-color);
